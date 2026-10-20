@@ -1,0 +1,34 @@
+
+name: Build Grey Room APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.4.1
+          use-dotnet: false
+
+      - name: Build project
+        run: |
+          if [ ! -f project.godot ]; then
+            echo "Project files are missing"
+            exit 1
+          fi
+          godot --headless --editor --path . --quit
+
+      - name: Upload project files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grey-room-build-logs
+          path: .
+          

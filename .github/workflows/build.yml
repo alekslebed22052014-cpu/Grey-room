@@ -3,32 +3,30 @@ name: Build Grey Room APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.4.1
+
     steps:
-      - name: Checkout repository
+      - name: Download project
         uses: actions/checkout@v4
 
-      - name: Set up Godot
-        uses: chickensoft-games/setup-godot@v2
-        with:
-          version: 4.4.1
-          use-dotnet: false
+      - name: Check project
+        run: godot --headless --editor --path . --quit
 
-      - name: Build project
+      - name: Export Android APK
         run: |
-          if [ ! -f project.godot ]; then
-            echo "Project files are missing"
-            exit 1
-          fi
-          godot --headless --editor --path . --quit
+          mkdir -p build
+          godot --headless --path . --export-debug "Android" build/GreyRoom.apk
 
-      - name: Upload project files
-        if: always()
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: grey-room-build-logs
-          path: .
+          name: Grey-Room-APK
+          path: build/GreyRoom.apk
           
